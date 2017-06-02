@@ -14,7 +14,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-//////////////////////////@@@@@@@@@@@@@@@@@  abhinav compliance document   @@@@@@@@@@@@@@@\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+//////////////////////////@@@@@@@@@@@@@@@@@   compliance document   @@@@@@@@@@@@@@@\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 //method for storing complaince document metadata and hash
 func uploadComplianceDocument(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	resp := BlockchainResponse{}
