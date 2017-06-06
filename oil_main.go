@@ -47,6 +47,8 @@ func (t *Oilchain) Query(stub shim.ChaincodeStubInterface, function string, args
 		return t.Read(stub, args)
 	} else if function == "readAllBorrowers" {
 		return t.ReadAllBorrowers(stub, args)
+	} else if function == "addFinancialStatement" {
+		return t.AddFinancialStatement(stub, args)
 	}
 
 	return nil, errors.New("error:C02 No function called")
