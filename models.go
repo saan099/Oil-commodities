@@ -4,7 +4,7 @@ type borrower struct {
 	Id                     string                  `json:"id"`
 	RegistratonID          string                  `json:"registrationId"`
 	Name                   string                  `json:"name"`
-	Email                  float64                 `json:"email"`
+	Email                  string                  `json:"email"`
 	FinancialReports       []financialReport       `json:"financialReport"`
 	ComplianceCertificates []complianceCertificate `json:"complianceCertifiacte"`
 	ReserveReports         []reserveReport         `json:"reserveReports"`

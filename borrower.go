@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"strconv"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -56,9 +57,9 @@ func (t *Oilchain) AddFinancialStatement(stub shim.ChaincodeStubInterface, args 
 	//  financialrep account data parsing
 	//////////////////////////////////////////////////
 	financialrep.Id = reportId
-	financialrep.CreditPeriod = creditDays
+	financialrep.CreditPeriod = strconv.Atoi(creditDays)
 	financialrep.Date = date
-	financialrep.LoanAmount = loanAmount
+	financialrep.LoanAmount = strconv.ParseFloat(loanAmount, float64)
 	financialrep.Status = `pending`
 
 	borrowerAcc := borrower{}
@@ -68,7 +69,7 @@ func (t *Oilchain) AddFinancialStatement(stub shim.ChaincodeStubInterface, args 
 
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
 	err := stub.PutState(borrowerId, newBorrowerAsbytes)
-	if er != nil {
+	if err != nil {
 		return nil, errors.New(`couldnt write state`)
 	}
 
