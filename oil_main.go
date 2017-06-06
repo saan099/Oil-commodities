@@ -74,5 +74,5 @@ func (t *Oilchain) ReadAllBorrowers(stub shim.ChaincodeStubInterface, args []str
 		return nil, errors.New("error:A05 wrong number of arguments")
 	}
 
-	return supplierData, nil
+	return nil, nil
 }
