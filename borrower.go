@@ -57,9 +57,9 @@ func (t *Oilchain) AddFinancialStatement(stub shim.ChaincodeStubInterface, args 
 	//  financialrep account data parsing
 	//////////////////////////////////////////////////
 	financialrep.Id = reportId
-	financialrep.CreditPeriod = strconv.Atoi(creditDays)
+	financialrep.CreditPeriod, _ = strconv.Atoi(creditDays)
 	financialrep.Date = date
-	financialrep.LoanAmount = strconv.ParseFloat(loanAmount, float64)
+	financialrep.LoanAmount, _ = strconv.ParseFloat(loanAmount, float64)
 	financialrep.Status = `pending`
 
 	borrowerAcc := borrower{}

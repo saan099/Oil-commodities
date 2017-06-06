@@ -14,7 +14,7 @@ var borrowersKey = `borrowersKey`
 
 func main() {
 
-	err := shim.Start(new(Supplychaincode))
+	err := shim.Start(new(Oilchain))
 	if err != nil {
 		fmt.Printf("Error starting Simple chaincode: %s", err)
 	}
