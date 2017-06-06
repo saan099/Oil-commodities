@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -11,7 +10,7 @@ import (
 type Oilchain struct {
 }
 
-var borrowersKey=`borrowersKey`
+var borrowersKey = `borrowersKey`
 
 func main() {
 
@@ -26,7 +25,6 @@ func (t *Oilchain) Init(stub shim.ChaincodeStubInterface, function string, args 
 		return nil, errors.New("error:A01 wrong number of aguments in initialization")
 	}
 
-
 	return nil, nil
 }
 
@@ -35,6 +33,8 @@ func (t *Oilchain) Invoke(stub shim.ChaincodeStubInterface, function string, arg
 
 	if function == "init" {
 		return t.Init(stub, function, args)
+	} else if function == "initBorrower" {
+		return t.InitBorrower(stub, args)
 	}
 
 	return nil, errors.New("error:C01 No function called")
@@ -71,10 +71,6 @@ func (t *Oilchain) ReadAllBorrowers(stub shim.ChaincodeStubInterface, args []str
 	if len(args) != 0 {
 		return nil, errors.New("error:A05 wrong number of arguments")
 	}
-
-
-
-
 
 	return supplierData, nil
 }
