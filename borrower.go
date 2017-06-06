@@ -52,7 +52,7 @@ func (t *Oilchain) AddFinancialStatement(stub shim.ChaincodeStubInterface, args 
 	date := args[3]
 	loanAmount := args[4]
 
-	var financialrep financialReport{}
+	var financialrep = financialReport{}
 	//////////////////////////////////////////////////
 	//  financialrep account data parsing
 	//////////////////////////////////////////////////
