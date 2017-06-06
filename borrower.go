@@ -4,7 +4,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -18,8 +18,8 @@ func (t *Oilchain) InitBorrower(stub shim.ChaincodeStubInterface,args []string) 
   var name=args[1]
   var registrationId=args[2]
   var email=args[3]
-  compCert:=[]complianceCertificate
-  financialRep:=[]financialReport
+  var compCert []complianceCertificate
+  var financialRep []financialReport
   reserveRep:=[]reserveReport
 //////////////////////////////////////////////////
 //  borrower account data parsing
