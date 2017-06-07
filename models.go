@@ -47,6 +47,7 @@ type loanPackage struct {
 	ComplianceCertificate complianceCertificate `json:"complianceCertificate"`
 	ReserveReport         reserveReport         `json:"reserveReport"`
 	AmountRequested       string                `json:"amountRequested"`
+	BorrowerName          string                `json:"borrowerName"`
 	Status                string                `json:"status"`
 }
 

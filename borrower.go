@@ -54,7 +54,7 @@ func (t *Oilchain) AddFinancialStatement(stub shim.ChaincodeStubInterface, args 
 
 	var financialrep = financialReport{}
 	//////////////////////////////////////////////////
-	//  financialrep account data parsing
+	//  financialrep data parsing
 	//////////////////////////////////////////////////
 	financialrep.Id = reportId
 	financialrep.CreditPeriod, _ = strconv.Atoi(creditDays)
@@ -75,3 +75,46 @@ func (t *Oilchain) AddFinancialStatement(stub shim.ChaincodeStubInterface, args 
 
 	return nil, nil
 }
+
+func (t *Oilchain) AddComplianceCertificate(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	if len(args) != 3 {
+		return nil, errors.New(`wrong number of arguments`)
+	}
+	borrowerId := args[0]
+	complianceRepId := args[1]
+	date := args[2]
+
+	complianceCert := complianceCertificate{}
+	//////////////////////////////////////////////////
+	//  complianceCert data parsing
+	//////////////////////////////////////////////////
+	complianceCert.BorrowerId = borrowerId
+	complianceCert.Id = complianceRepId
+	complianceCert.Date = date
+
+	borrowerAcc := borrower{}
+	borrowerAsbytes, _ := stub.GetState(borrowerId)
+	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+	borrowerAcc.ComplianceCertificates = append(borrowerAcc.ComplianceCertificates, complianceCertificate)
+	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
+	err := stub.PutState(borrowerId, newBorrowerAsbytes)
+	if err != nil {
+		return nil, errors.New(`not written in state.`)
+	}
+	return nil, nil
+}
+
+/*
+func (t *Oilchain) RequestReserveReport(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+  if len(args)!=2{
+    return nil, errors.New(`wrong number of arguments.`)
+  }
+  borrowerId:=args[0]
+  engineerId:=args[1]
+
+
+
+  return nil,nil
+}
+*/
