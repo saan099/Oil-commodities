@@ -36,7 +36,7 @@ func (t *Oilchain) InitEngineer(stub shim.ChaincodeStubInterface, args []string)
 }
 
 func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 5 {
+	if len(args) != 6 {
 		return nil, errors.New(`wrong number of arguments`)
 	}
 
@@ -67,6 +67,16 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	err := stub.PutState(engineerId, newEngineerAsbytes)
 	if err != nil {
 		return nil, errors.New(`didnt write state`)
+	}
+
+	borrowerAcc := borrower{}
+	borrowerAsbytes, _ := stub.GetState(borrowerId)
+	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+	borrowerAcc.ReserveReports = append(borrowerAcc.ReserveReports, reserveRep)
+	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
+	err = stub.PutState(borrowerid, newBorrowerAsbytes)
+	if err != nil {
+		return nil, errors.New("didnt write state")
 	}
 
 	return nil, nil
