@@ -128,7 +128,7 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	//          loan package parsing
 	////////////////////////////////////////////////////
 	loanPack.Id = loanPackageId
-	loanPack.AmountRequested, _ = strconv.Atoi(amountRequested)
+	loanPack.AmountRequested, _ = strconv.ParseFloat(amountRequested, 64)
 	loanPack.BorrowerId = borrowerId
 	for i := 0; i < len(borrowerAcc.FinancialReports); i++ {
 		if borrowerAcc.FinancialReports[i].Id == financialId {
