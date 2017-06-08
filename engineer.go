@@ -51,7 +51,7 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	////////////////////////////////////////////////
 	//       reserve report  parsing
 	////////////////////////////////////////////////
-	reserveRep.Id = engineerId
+	reserveRep.Id = reportId
 	reserveRep.BorrowerId = borrowerid
 	reserveRep.EngineerId = engineerId
 	reserveRep.Date = date
