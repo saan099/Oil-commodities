@@ -55,11 +55,11 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	reserveRep.BorrowerId = borrowerid
 	reserveRep.EngineerId = engineerId
 	reserveRep.Date = date
-	reserveRep.DevelopedCrude = strconv.ParseFloat(developedCrude, 64)
-	reserveRep.UndevelopedCrude = strconv.ParseFloat(undevelopedCrude, 64)
+	reserveRep.DevelopedCrude, _ = strconv.ParseFloat(developedCrude, 64)
+	reserveRep.UndevelopedCrude, _ = strconv.ParseFloat(undevelopedCrude, 64)
 
 	engineerAcc := engineer{}
-	engineerAsbytes := stub.GetState(engineerId)
+	engineerAsbytes, _ := stub.GetState(engineerId)
 	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
 	engineerAcc.ReserveReports = append(engineerAcc.ReserveReports, reserveRep)
 
@@ -70,7 +70,7 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	}
 
 	borrowerAcc := borrower{}
-	borrowerAsbytes, _ := stub.GetState(borrowerId)
+	borrowerAsbytes, _ := stub.GetState(borrowerid)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 	borrowerAcc.ReserveReports = append(borrowerAcc.ReserveReports, reserveRep)
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
