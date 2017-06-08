@@ -36,7 +36,7 @@ func (t *Oilchain) InitEngineer(stub shim.ChaincodeStubInterface, args []string)
 }
 
 func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 5 {
+	if len(args) != 6 {
 		return nil, errors.New(`wrong number of arguments`)
 	}
 
@@ -51,15 +51,15 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	////////////////////////////////////////////////
 	//       reserve report  parsing
 	////////////////////////////////////////////////
-	reserveRep.Id = engineerId
+	reserveRep.Id = reportId
 	reserveRep.BorrowerId = borrowerid
 	reserveRep.EngineerId = engineerId
 	reserveRep.Date = date
-	reserveRep.DevelopedCrude = strconv.ParseFloat(developedCrude, 64)
-	reserveRep.UndevelopedCrude = strconv.ParseFloat(undevelopedCrude, 64)
+	reserveRep.DevelopedCrude, _ = strconv.ParseFloat(developedCrude, 64)
+	reserveRep.UndevelopedCrude, _ = strconv.ParseFloat(undevelopedCrude, 64)
 
 	engineerAcc := engineer{}
-	engineerAsbytes := stub.GetState(engineerId)
+	engineerAsbytes, _ := stub.GetState(engineerId)
 	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
 	engineerAcc.ReserveReports = append(engineerAcc.ReserveReports, reserveRep)
 
@@ -67,6 +67,16 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	err := stub.PutState(engineerId, newEngineerAsbytes)
 	if err != nil {
 		return nil, errors.New(`didnt write state`)
+	}
+
+	borrowerAcc := borrower{}
+	borrowerAsbytes, _ := stub.GetState(borrowerid)
+	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+	borrowerAcc.ReserveReports = append(borrowerAcc.ReserveReports, reserveRep)
+	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
+	err = stub.PutState(borrowerid, newBorrowerAsbytes)
+	if err != nil {
+		return nil, errors.New("didnt write state")
 	}
 
 	return nil, nil

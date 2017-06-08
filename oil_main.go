@@ -37,6 +37,12 @@ func (t *Oilchain) Invoke(stub shim.ChaincodeStubInterface, function string, arg
 		return t.InitBorrower(stub, args)
 	} else if function == "addFinancialStatement" {
 		return t.AddFinancialStatement(stub, args)
+	} else if function == "initEngineer" {
+		return t.InitEngineer(stub, args)
+	} else if function == "makeReserveReport" {
+		return t.MakeReserveReport(stub, args)
+	} else if function == "addComplianceCertificate" {
+		return t.AddComplianceCertificate(stub, args)
 	}
 
 	return nil, errors.New("error:C01 No function called")
