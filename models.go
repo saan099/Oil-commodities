@@ -12,6 +12,7 @@ type borrower struct {
 
 type financialReport struct {
 	Id           string  `json:"id"`
+	BorrowerId   string  `json:"borrowerId"`
 	Date         string  `json:"date"`
 	LoanAmount   float64 `json:"loanAmount"`
 	CreditPeriod int     `json:"creditPeriod"`
