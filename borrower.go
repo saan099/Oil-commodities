@@ -96,7 +96,7 @@ func (t *Oilchain) AddComplianceCertificate(stub shim.ChaincodeStubInterface, ar
 	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerId)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
-	borrowerAcc.ComplianceCertificates = append(borrowerAcc.ComplianceCertificates, complianceCertificate)
+	borrowerAcc.ComplianceCertificates = append(borrowerAcc.ComplianceCertificates, complianceCert)
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
 	err := stub.PutState(borrowerId, newBorrowerAsbytes)
 	if err != nil {
