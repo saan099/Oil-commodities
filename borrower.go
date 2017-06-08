@@ -105,6 +105,68 @@ func (t *Oilchain) AddComplianceCertificate(stub shim.ChaincodeStubInterface, ar
 	return nil, nil
 }
 
+func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) < 4 {
+		return nl, errors.New("wrong number of arguments")
+	}
+
+	borrowerId := args[0]
+	loanPackageId := args[1]
+	amountRequested := args[2]
+	financialId := args[3]
+	complianceId := args[4]
+	reserveId := args[5]
+	numOfDocs := strconv.Atoi(args[6])
+
+	borrowerAcc := borrower{}
+	borrowerAsbytes, _ := stub.GetState(borrowerId)
+	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+
+	var docs []document
+	loanPack := loanPackage{}
+	////////////////////////////////////////////////////
+	//          loan package parsing
+	////////////////////////////////////////////////////
+	loanPack.Id = loanPackageId
+	loanPack.AmountRequested = strconv.Atoi(amountRequested)
+	loanPack.BorrowerId = borrowerId
+	for i := 0; i < len(borrowerAcc.FinancialReports); i++ {
+		if borrowerAcc.FinancialReports[i].Id == financialId {
+			loanPack.FinancialReport = borrowerAcc.FinancialReports[i]
+		}
+	}
+	for i := 0; i < len(borrowerAcc.ComplianceCertificates); i++ {
+		if borrowerAcc.ComplianceCertificates[i].Id == complianceId {
+			loanPack.ComplianceCertificate = borrowerAcc.ComplianceCertificates[i]
+		}
+	}
+	for i := 0; i < len(borrowerAcc.ReserveReports); i++ {
+		if borrowerAcc.ReserveReports[i].Id == reserveId {
+			loanPack.ReserveReport = borrowerAcc.ReserveReports[i]
+		}
+	}
+
+	loanPack.BorrowerName = borrowerAcc.Name
+	loanPack.Status = `pending`
+	for i := 7; i < numOfDocs*2; i++ {
+		doc := document{}
+		doc.DocName = args[i]
+		i = i + 1
+		doc.Id = args[i]
+		docs = append(docs, doc)
+	}
+	loanPack.Documents = docs
+
+	borrowerAcc.LoanPacks = append(borrowerAcc.LoanPacks, loanPack)
+	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
+	err := stub.PutState(borrowerId, newBorrowerAsbytes)
+	if err != nil {
+		return nil, errors.New(`didnt write state`)
+	}
+
+	return nil, nil
+}
+
 /*
 func (t *Oilchain) RequestReserveReport(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
   if len(args)!=2{

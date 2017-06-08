@@ -8,6 +8,7 @@ type borrower struct {
 	FinancialReports       []financialReport       `json:"financialReport"`
 	ComplianceCertificates []complianceCertificate `json:"complianceCertifiacte"`
 	ReserveReports         []reserveReport         `json:"reserveReports"`
+	LoanPacks              []loanPackage           `json:"loanPacks"`
 }
 
 type financialReport struct {
@@ -41,12 +42,17 @@ type reserveReport struct {
 	DevelopedCrude   float64 `json:"developedCrude"`
 	UndevelopedCrude float64 `json:"undevelopedCrude"`
 }
-
+type document struct {
+	Id      string `json:"id"`
+	DocName string `json:"docName"`
+}
 type loanPackage struct {
+	Id                    string                `json:"id"`
 	BorrowerId            string                `json:"borrowerId"`
 	FinancialReport       financialReport       `json:"financialReport"`
 	ComplianceCertificate complianceCertificate `json:"complianceCertificate"`
 	ReserveReport         reserveReport         `json:"reserveReport"`
+	Documents             []document            `json:"documents"`
 	AmountRequested       string                `json:"amountRequested"`
 	BorrowerName          string                `json:"borrowerName"`
 	Status                string                `json:"status"`
@@ -56,4 +62,11 @@ type auditor struct {
 	Id               string            `json:"id"`
 	Name             string            `json:"name"`
 	FinancialReports []financialReport `json:"financialReport"`
+}
+
+type administrativeAgent struct {
+	Id          string        `json:"id"`
+	Name        string        `json:"name"`
+	Email       string        `json:"email"`
+	LoanPackage []loanPackage `json:"loanPackage"`
 }
