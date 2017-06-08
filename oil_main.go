@@ -31,8 +31,9 @@ func (t *Oilchain) Init(stub shim.ChaincodeStubInterface, function string, args 
 //Invoking functionality
 func (t *Oilchain) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
+	//handle different functions
 	if function == "init" {
-		return t.Init(stub, function, args)
+		return t.Init(stub, "init", args)
 	} else if function == "initBorrower" {
 		return t.InitBorrower(stub, args)
 	} else if function == "addFinancialStatement" {
