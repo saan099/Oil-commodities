@@ -46,6 +46,8 @@ func (t *Oilchain) Invoke(stub shim.ChaincodeStubInterface, function string, arg
 		return t.AddComplianceCertificate(stub, args)
 	} else if function == "createLoanPackage" {
 		return t.CreateLoanPackage(stub, args)
+	} else if function == "initAdministrativeAgent" {
+		return t.InitAdministrativeAgent(stub, args)
 	}
 
 	return nil, errors.New("error:C01 No function called")
