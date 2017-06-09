@@ -23,7 +23,7 @@ func (t *Oilchain) InitBorrower(stub shim.ChaincodeStubInterface, args []string)
 	//////////////////////////////////////////////////
 	//  borrower account data parsing
 	//////////////////////////////////////////////////
-	var borrowerAcc = borrower{}
+	borrowerAcc := borrower{}
 	borrowerAcc.Id = borrowerId
 	borrowerAcc.Name = name
 	borrowerAcc.RegistratonID = registrationId
