@@ -24,7 +24,7 @@ func (t *Oilchain) InitAdministrativeAgent(stub shim.ChaincodeStubInterface, arg
 	adminAcc.Email = email
 
 	borrowerAsbytes, _ := json.Marshal(adminAcc)
-	err := stub.PutState(adminId, &borrowerAsbytes)
+	err := stub.PutState(adminId, borrowerAsbytes)
 	if err != nil {
 		return nil, errors.New(`didnt write state`)
 	}
