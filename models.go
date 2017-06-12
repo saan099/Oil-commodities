@@ -7,6 +7,7 @@ type borrower struct {
 	Email                  string                  `json:"email"`
 	FinancialReports       []financialReport       `json:"financialReport"`
 	ComplianceCertificates []complianceCertificate `json:"complianceCertifiacte"`
+	Requests               []request               `json:"Requests"`
 	ReserveReports         []reserveReport         `json:"reserveReports"`
 	LoanPacks              []loanPackage           `json:"loanPacks"`
 }
@@ -31,10 +32,17 @@ type engineer struct {
 	Name           string          `json:"name"`
 	RegistratonID  string          `json:"registrationId"`
 	Email          string          `json:"email"`
+	Requests       []request       `json:"requests"`
 	ReserveReports []reserveReport `json:"reserveReports"`
+}
+type request struct {
+	Id         string `json:"id"`
+	BorrowerId `json:"borrowerId"`
+	Status     string `json:"status"`
 }
 
 type reserveReport struct {
+	RequestId        string  `json:"requestId"`
 	Id               string  `json:"id"`
 	Date             string  `json:"date"`
 	EngineerId       string  `json:"engineerId"`

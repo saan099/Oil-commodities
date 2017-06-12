@@ -118,6 +118,7 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	complianceId := args[4]
 	reserveId := args[5]
 	numOfDocs, _ := strconv.Atoi(args[6])
+	administrativeAgentId := args[7]
 
 	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerId)
@@ -164,7 +165,15 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	if err != nil {
 		return nil, errors.New(`didnt write state`)
 	}
-
+	adminAcc := administrativeAgent{}
+	adminAsbytes, _ := stub.getState(administrativeAgentId)
+	_ = json.Unmarshal(adminAsbytes, &adminAcc)
+	adminAcc.LoanPackage = append(adminAcc.LoanPackage, loanPack)
+	newAdminAsbytes, _ := json.Marshal(adminAcc)
+	err = stub.PutState(administrativeAgentId, newAdminAsbytes)
+	if err != nil {
+		return nil, errors.New(`didnt write state`)
+	}
 	return nil, nil
 }
 
