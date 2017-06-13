@@ -51,7 +51,7 @@ func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 			borrowerId = adminAgentAcc.LoanPackage[i].BorrowerId
 		}
 	}
-	if borrowerId == nil {
+	if borrowerId == null {
 		return nil, nil
 	}
 	borrowerAcc := borrower{}
