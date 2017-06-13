@@ -37,7 +37,7 @@ type engineer struct {
 }
 type request struct {
 	Id         string `json:"id"`
-	BorrowerId `json:"borrowerId"`
+	BorrowerId string `json:"borrowerId"`
 	Status     string `json:"status"`
 }
 
