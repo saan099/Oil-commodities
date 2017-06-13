@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -11,6 +12,7 @@ type Oilchain struct {
 }
 
 var borrowersKey = `borrowersKey`
+var loanStackKey = `loanStack`
 
 func main() {
 
@@ -24,7 +26,12 @@ func (t *Oilchain) Init(stub shim.ChaincodeStubInterface, function string, args 
 	if len(args) != 0 {
 		return nil, errors.New("error:A01 wrong number of aguments in initialization")
 	}
-
+	var loans []loanPackage
+	loansAsbytes, _ := json.Marshal(loanPackage)
+	err := stub.PutState(loanStackKey, loansAsbytes)
+	if err != nil {
+		return nil, errors.New(`didnt write state.`)
+	}
 	return nil, nil
 }
 
@@ -48,6 +55,10 @@ func (t *Oilchain) Invoke(stub shim.ChaincodeStubInterface, function string, arg
 		return t.CreateLoanPackage(stub, args)
 	} else if function == "initAdministrativeAgent" {
 		return t.InitAdministrativeAgent(stub, args)
+	} else if function == "initAuditor" {
+		return t.InitAuditor(stub, args)
+	} else if function == "updateLoanPackage" {
+		return t.UpdateLoanPackage(stub, args)
 	}
 
 	return nil, errors.New("error:C01 No function called")
