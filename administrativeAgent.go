@@ -67,7 +67,7 @@ func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface,args []str
   newBorrowerAbytes, _:=json.Marshal(borrowerAcc)
   err:=stub.PutState(borrowerId,newBorrowerAbytes)
   if err!=nil {
-    retun nil, errors.New(`didnt write state`)
+    return nil, errors.New(`didnt write state`)
   }
 
   newAdminagentAsbytes, _ :=json.Marshal(adminAgentAcc)
