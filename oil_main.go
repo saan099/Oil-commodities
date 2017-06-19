@@ -59,13 +59,8 @@ func (t *Oilchain) Invoke(stub shim.ChaincodeStubInterface, function string, arg
 		return t.InitAuditor(stub, args)
 	} else if function == "updateLoanPackage" {
 		return t.UpdateLoanPackage(stub, args)
-<<<<<<< HEAD
-	} else if function == "auditfinancialstatement" {
-		return t.Auditfinancialstatement(stub, args)
-=======
 	} else if function == "requestFinancialStatement" {
 		return t.RequestFinancialStatement(stub, args)
->>>>>>> sankalp
 	}
 
 	return nil, errors.New("error:C01 No function called")
