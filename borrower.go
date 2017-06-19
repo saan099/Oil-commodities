@@ -1,9 +1,11 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"strconv"
+	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -41,37 +43,42 @@ func (t *Oilchain) InitBorrower(stub shim.ChaincodeStubInterface, args []string)
 	return nil, nil
 }
 
-func (t *Oilchain) AddFinancialStatement(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 5 {
-		return nil, errors.New(`wrong number of arguments`)
+func (t *Oilchain) RequestFinancialStatement(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 3 {
+		return nil, error.New("worng number of arguments")
 	}
+	requestId := args[0]
+	borrowerId := args[1]
+	auditorId := args[2]
+	currentT := time.Now().Local()
+	date := currentT.Format("02-01-2006")
 
-	borrowerId := args[0]
-	reportId := args[1]
-	creditDays := args[2]
-	date := args[3]
-	loanAmount := args[4]
-
-	var financialrep = financialReport{}
-	//////////////////////////////////////////////////
-	//  financialrep data parsing
-	//////////////////////////////////////////////////
-	financialrep.Id = reportId
-	financialrep.CreditPeriod, _ = strconv.Atoi(creditDays)
-	financialrep.Date = date
-	financialrep.LoanAmount, _ = strconv.ParseFloat(loanAmount, 64)
-	financialrep.Status = `pending`
-	financialrep.BorrowerId = borrowerId
+	var req request
+	req.Id = requestId
+	req.BorrowerId = borrowerId
+	req.Date = date
+	req.Status = "pending"
 
 	borrowerAcc := borrower{}
-	borrowerAsytes, _ := stub.GetState(borrowerId)
-	_ = json.Unmarshal(borrowerAsytes, &borrowerAcc)
-	borrowerAcc.FinancialReports = append(borrowerAcc.FinancialReports, financialrep)
+	borrowerAsbytes, _ := stub.GetState(borrowerId)
+	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+	borrowerAcc.Requests = append(borrowerAcc.Requests, req)
 
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
 	err := stub.PutState(borrowerId, newBorrowerAsbytes)
 	if err != nil {
-		return nil, errors.New(`couldnt write state`)
+		return nil, errors.New("didnt write state")
+	}
+
+	auditorAcc := auditor{}
+	auditorAsbytes, _ := stub.Getstate(auditorId)
+	_ = json.Unmarshal(auditorAsbytes, &auditorAcc)
+	auditorAcc.Requests = append(auditorAcc.Requests, req)
+	newAuditorAsbytes := json.Marshal(auditorAcc)
+
+	err = stub.PutState(auditorId, newAuditorAsbytes)
+	if err != nil {
+		return nil, errors.New("didnt write state")
 	}
 
 	return nil, nil
@@ -107,21 +114,20 @@ func (t *Oilchain) AddComplianceCertificate(stub shim.ChaincodeStubInterface, ar
 }
 
 func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) < 4 {
+	if len(args) < 6 {
 		return nil, errors.New("wrong number of arguments")
 	}
 
 	borrowerId := args[0]
 	loanPackageId := args[1]
 	amountRequested := args[2]
-	financialId := args[3]
-	complianceId := args[4]
-	reserveId := args[5]
-	numOfDocs, _ := strconv.Atoi(args[6])
-	administrativeAgentId := args[7]
+	//financialStatementNumber := strconv.Atoi(args[3])
+	complianceId := args[3]
+	requestTo := args[4]
+	numOfDocs, _ := strconv.Atoi(args[5])
 
 	borrowerAcc := borrower{}
-	borrowerAsbytes, _ := stub.GetState(borrowerId)
+	requestId, borrowerAsbytes := RequestReserveReport(stub, requestTo, borrowerId)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 
 	var docs []document
@@ -132,25 +138,17 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	loanPack.Id = loanPackageId
 	loanPack.AmountRequested, _ = strconv.ParseFloat(amountRequested, 64)
 	loanPack.BorrowerId = borrowerId
-	for i := 0; i < len(borrowerAcc.FinancialReports); i++ {
-		if borrowerAcc.FinancialReports[i].Id == financialId {
-			loanPack.FinancialReport = borrowerAcc.FinancialReports[i]
-		}
-	}
+
 	for i := 0; i < len(borrowerAcc.ComplianceCertificates); i++ {
 		if borrowerAcc.ComplianceCertificates[i].Id == complianceId {
 			loanPack.ComplianceCertificate = borrowerAcc.ComplianceCertificates[i]
 		}
 	}
-	for i := 0; i < len(borrowerAcc.ReserveReports); i++ {
-		if borrowerAcc.ReserveReports[i].Id == reserveId {
-			loanPack.ReserveReport = borrowerAcc.ReserveReports[i]
-		}
-	}
 
 	loanPack.BorrowerName = borrowerAcc.Name
 	loanPack.Status = `pending`
-	for i := 7; i < numOfDocs*2; i++ {
+	var i int
+	for i = 6; i < numOfDocs*2; i++ {
 		doc := document{}
 		doc.DocName = args[i]
 		i = i + 1
@@ -158,6 +156,15 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 		docs = append(docs, doc)
 	}
 	loanPack.Documents = docs
+	loanPack.RequestReserveReport.RequestTo = requestTo
+	for i := range borrowerAcc.Requests {
+		if borrowerAcc.Requests[i].Id == requestId {
+			loanPack.RequestReserveReport = borrowerAcc.Requests[i]
+		}
+	}
+	for j := range borrowerAcc.FinancialReports {
+		loanPack.FinancialReports = append(loanPack.FinancialReports, borrowerAcc.FinancialReports[j])
+	}
 
 	borrowerAcc.LoanPacks = append(borrowerAcc.LoanPacks, loanPack)
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
@@ -165,16 +172,39 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	if err != nil {
 		return nil, errors.New(`didnt write state`)
 	}
-	adminAcc := administrativeAgent{}
-	adminAsbytes, _ := stub.GetState(administrativeAgentId)
-	_ = json.Unmarshal(adminAsbytes, &adminAcc)
-	adminAcc.LoanPackage = append(adminAcc.LoanPackage, loanPack)
-	newAdminAsbytes, _ := json.Marshal(adminAcc)
-	err = stub.PutState(administrativeAgentId, newAdminAsbytes)
-	if err != nil {
-		return nil, errors.New(`didnt write state`)
-	}
+
 	return nil, nil
+}
+
+func RequestReserveReport(stub shim.ChaincodeStubinterface, to string, borrowerId string) (string, []byte) {
+	req := request{}
+	req.BorrowerId = borrowerId
+	req.RequestTo = to
+	req.Status = `pending`
+	req.Type = `reserveReport`
+	currentT := time.Now().Local()
+	date := currentT.Format("02-01-2006")
+	req.Date = date
+	h := sha256.New()
+	h.Write([]byte(currentT))
+	req.Id = h.Sum(nil)
+
+	engineerAcc := engineer{}
+	engineerAsbytes, _ := stub.GetState(to)
+	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
+	engineerAcc.Requests = append(engineerAcc.Requests, req)
+	newEngineerAsbytes, _ := json.Marshal(engineerAcc)
+	err := stub.PutState(to, newEngineerAsbytes)
+	if err != nil {
+		return nil, errors.New("didnt write state")
+	}
+
+	borrowerAcc := borrower{}
+	borrowerAsbytes, _ := stub.GetState(borrowerId)
+	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+	borrowerAcc.Requests = append(borrowerAcc.Requests, req)
+	borrowerAsbytes, _ := json.Marshal(borrowerAcc)
+	return h.Sum(nil), borrowerAsbytes
 }
 
 /*
