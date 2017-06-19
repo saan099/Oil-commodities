@@ -196,9 +196,6 @@ func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerI
 	engineerAcc.Requests = append(engineerAcc.Requests, req)
 	newEngineerAsbytes, _ := json.Marshal(engineerAcc)
 	err := stub.PutState(to, newEngineerAsbytes)
-	if err != nil {
-		return null, errors.New("didnt write state")
-	}
 
 	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerId)
