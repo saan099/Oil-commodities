@@ -14,6 +14,7 @@ type borrower struct {
 
 type financialReport struct {
 	Id           string  `json:"id"`
+	RequestId    string  `json:"requestId"`
 	BorrowerId   string  `json:"borrowerId"`
 	Date         string  `json:"date"`
 	LoanAmount   float64 `json:"loanAmount"`
@@ -38,7 +39,10 @@ type engineer struct {
 type request struct {
 	Id         string `json:"id"`
 	BorrowerId string `json:"borrowerId"`
+	RequestTo  string `json:"requestTo"`
+	Type       string `json:"type"`
 	Status     string `json:"status"`
+	Date       string `json:"date"`
 }
 
 type reserveReport struct {
@@ -57,8 +61,9 @@ type document struct {
 type loanPackage struct {
 	Id                    string                `json:"id"`
 	BorrowerId            string                `json:"borrowerId"`
-	FinancialReport       financialReport       `json:"financialReport"`
+	FinancialReports      []financialReport     `json:"financialReports"`
 	ComplianceCertificate complianceCertificate `json:"complianceCertificate"`
+	RequestReserveReport  request               `json:"requestReserveReport"`
 	ReserveReport         reserveReport         `json:"reserveReport"`
 	Documents             []document            `json:"documents"`
 	AmountRequested       float64               `json:"amountRequested"`
@@ -69,6 +74,7 @@ type loanPackage struct {
 type auditor struct {
 	Id               string            `json:"id"`
 	Name             string            `json:"name"`
+	Requests         []request         `json:"requests"`
 	FinancialReports []financialReport `json:"financialReport"`
 }
 
