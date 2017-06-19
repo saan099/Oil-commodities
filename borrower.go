@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"strconv"
@@ -45,7 +46,7 @@ func (t *Oilchain) InitBorrower(stub shim.ChaincodeStubInterface, args []string)
 
 func (t *Oilchain) RequestFinancialStatement(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 3 {
-		return nil, error.New("worng number of arguments")
+		return nil, errors.New("worng number of arguments")
 	}
 	requestId := args[0]
 	borrowerId := args[1]
@@ -71,10 +72,10 @@ func (t *Oilchain) RequestFinancialStatement(stub shim.ChaincodeStubInterface, a
 	}
 
 	auditorAcc := auditor{}
-	auditorAsbytes, _ := stub.Getstate(auditorId)
+	auditorAsbytes, _ := stub.GetState(auditorId)
 	_ = json.Unmarshal(auditorAsbytes, &auditorAcc)
 	auditorAcc.Requests = append(auditorAcc.Requests, req)
-	newAuditorAsbytes := json.Marshal(auditorAcc)
+	newAuditorAsbytes, _ := json.Marshal(auditorAcc)
 
 	err = stub.PutState(auditorId, newAuditorAsbytes)
 	if err != nil {
@@ -176,7 +177,7 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	return nil, nil
 }
 
-func RequestReserveReport(stub shim.ChaincodeStubinterface, to string, borrowerId string) (string, []byte) {
+func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerId string) (string, []byte) {
 	req := request{}
 	req.BorrowerId = borrowerId
 	req.RequestTo = to
@@ -186,8 +187,8 @@ func RequestReserveReport(stub shim.ChaincodeStubinterface, to string, borrowerI
 	date := currentT.Format("02-01-2006")
 	req.Date = date
 	h := sha256.New()
-	h.Write([]byte(currentT))
-	req.Id = h.Sum(nil)
+	h.Write([]byte(currentT.String()))
+	req.Id = hex.EncodeToString(h.Sum(nil)) //h.Sum(nil)
 
 	engineerAcc := engineer{}
 	engineerAsbytes, _ := stub.GetState(to)
@@ -204,7 +205,7 @@ func RequestReserveReport(stub shim.ChaincodeStubinterface, to string, borrowerI
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 	borrowerAcc.Requests = append(borrowerAcc.Requests, req)
 	borrowerAsbytes, _ := json.Marshal(borrowerAcc)
-	return h.Sum(nil), borrowerAsbytes
+	return req.Id, borrowerAsbytes
 }
 
 /*
