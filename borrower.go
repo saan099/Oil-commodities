@@ -59,6 +59,8 @@ func (t *Oilchain) RequestFinancialStatement(stub shim.ChaincodeStubInterface, a
 	req.BorrowerId = borrowerId
 	req.Date = date
 	req.Status = "pending"
+	req.RequestTo = auditorId
+	req.Type = "financialStatement"
 
 	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerId)
