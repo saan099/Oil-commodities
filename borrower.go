@@ -201,7 +201,6 @@ func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerI
 	newEngineerAsbytes, _ := json.Marshal(engineerAcc)
 	_ = stub.PutState(to, newEngineerAsbytes)
 
-	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerId)
 
 	return req.Id, borrowerAsbytes
