@@ -41,26 +41,37 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	}
 
 	engineerId := args[0]
-	borrowerid := args[1]
+	reqId := args[1]
 	reportId := args[2]
 	date := args[3]
 	developedCrude := args[4]
 	undevelopedCrude := args[5]
+
+	engineerAcc := engineer{}
+	engineerAsbytes, _ := stub.GetState(engineerId)
+	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
+	var borrowerid string
+	var loanId string
+	for i := range engineerAcc.Requests {
+		if engineerAcc.Requests[i].Id == reqId {
+			borrowerid = engineerAcc.Requests[i].BorrowerId
+			engineerAcc.Requests[i].Status = `done`
+			loanId = engineerAcc.Requests[i].LoanId
+		}
+	}
 
 	reserveRep := reserveReport{}
 	////////////////////////////////////////////////
 	//       reserve report  parsing
 	////////////////////////////////////////////////
 	reserveRep.Id = reportId
+	reserveRep.RequestId = reqId
 	reserveRep.BorrowerId = borrowerid
 	reserveRep.EngineerId = engineerId
 	reserveRep.Date = date
 	reserveRep.DevelopedCrude, _ = strconv.ParseFloat(developedCrude, 64)
 	reserveRep.UndevelopedCrude, _ = strconv.ParseFloat(undevelopedCrude, 64)
 
-	engineerAcc := engineer{}
-	engineerAsbytes, _ := stub.GetState(engineerId)
-	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
 	engineerAcc.ReserveReports = append(engineerAcc.ReserveReports, reserveRep)
 
 	newEngineerAsbytes, _ := json.Marshal(engineerAcc)
@@ -72,6 +83,17 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerid)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+	for i := range borrowerAcc.LoanPacks {
+		if borrowerAcc.LoanPacks[i].Id == loanId {
+			borrowerAcc.LoanPacks[i].ReserveReport = reserveRep
+			borrowerAcc.LoanPacks[i].Status = `delivered`
+			borrowerAcc.LoanPacks[i].RequestReserveReport.Status = `done`
+			erro := sendLoanPackage(stub, borrowerAcc.LoanPacks[i].AdministrativeAgentId, borrowerAcc.LoanPacks[i])
+			if erro != nil {
+				return nil, errors.New(`couldnt send loan apckage to administrative agent`)
+			}
+		}
+	}
 	borrowerAcc.ReserveReports = append(borrowerAcc.ReserveReports, reserveRep)
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
 	err = stub.PutState(borrowerid, newBorrowerAsbytes)
@@ -80,4 +102,19 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	}
 
 	return nil, nil
+}
+
+func sendLoanPackage(stub shim.ChaincodeStubInterface, adminId string, loanPack loanPackage) error {
+
+	adminAcc := administrativeAgent{}
+	adminAsbytes, _ := stub.GetState(adminId)
+	_ = json.Unmarshal(adminAsbytes, &adminAcc)
+	adminAcc.LoanPackage = append(adminAcc.LoanPackage, loanPack)
+	newAdminAsbytes, _ := json.Marshal(adminAcc)
+	err := stub.PutState(adminId, newAdminAsbytes)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }

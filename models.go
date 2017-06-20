@@ -29,17 +29,27 @@ type complianceCertificate struct {
 }
 
 type engineer struct {
-	Id             string          `json:"id"`
-	Name           string          `json:"name"`
-	RegistratonID  string          `json:"registrationId"`
-	Email          string          `json:"email"`
-	Requests       []request       `json:"requests"`
-	ReserveReports []reserveReport `json:"reserveReports"`
+	Id             string           `json:"id"`
+	Name           string           `json:"name"`
+	RegistratonID  string           `json:"registrationId"`
+	Email          string           `json:"email"`
+	Requests       []reserveRequest `json:"requests"`
+	ReserveReports []reserveReport  `json:"reserveReports"`
 }
 type request struct {
 	Id         string `json:"id"`
 	BorrowerId string `json:"borrowerId"`
 	RequestTo  string `json:"requestTo"`
+	Type       string `json:"type"`
+	Status     string `json:"status"`
+	Date       string `json:"date"`
+}
+
+type reserveRequest struct {
+	LoanId     string `json:"loanId"`
+	Id         string `json:"id"`
+	BorrowerId string `json:"borrowerId"`
+	EngineerId string `json:"engineerId"`
 	Type       string `json:"type"`
 	Status     string `json:"status"`
 	Date       string `json:"date"`
@@ -61,6 +71,7 @@ type document struct {
 type loanPackage struct {
 	Id                    string                `json:"id"`
 	BorrowerId            string                `json:"borrowerId"`
+	AdministrativeAgentId string                `json:"administrativeAgentId"`
 	FinancialReports      []financialReport     `json:"financialReports"`
 	ComplianceCertificate complianceCertificate `json:"complianceCertificate"`
 	RequestReserveReport  request               `json:"requestReserveReport"`

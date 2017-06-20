@@ -124,13 +124,14 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	borrowerId := args[0]
 	loanPackageId := args[1]
 	amountRequested := args[2]
+	adminAgentId := args[3]
 	//financialStatementNumber := strconv.Atoi(args[3])
-	complianceId := args[3]
-	requestTo := args[4]
-	numOfDocs, _ := strconv.Atoi(args[5])
+	complianceId := args[4]
+	requestTo := args[5]
+	numOfDocs, _ := strconv.Atoi(args[6])
 
 	borrowerAcc := borrower{}
-	requestId, borrowerAsbytes := RequestReserveReport(stub, requestTo, borrowerId)
+	requestId, borrowerAsbytes := RequestReserveReport(stub, requestTo, borrowerId, loanPackageId)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 
 	var docs []document
@@ -141,7 +142,7 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	loanPack.Id = loanPackageId
 	loanPack.AmountRequested, _ = strconv.ParseFloat(amountRequested, 64)
 	loanPack.BorrowerId = borrowerId
-
+	loanPack.AdministrativeAgentId = adminAgentId
 	for i := 0; i < len(borrowerAcc.ComplianceCertificates); i++ {
 		if borrowerAcc.ComplianceCertificates[i].Id == complianceId {
 			loanPack.ComplianceCertificate = borrowerAcc.ComplianceCertificates[i]
@@ -151,7 +152,7 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	loanPack.BorrowerName = borrowerAcc.Name
 	loanPack.Status = `pending`
 	var i int
-	for i = 6; i < numOfDocs*2; i++ {
+	for i = 7; i < 7+numOfDocs*2; i++ {
 		doc := document{}
 		doc.DocName = args[i]
 		i = i + 1
@@ -179,12 +180,13 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	return nil, nil
 }
 
-func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerId string) (string, []byte) {
-	req := request{}
+func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerId string, loanPackageId string) (string, []byte) {
+	req := reserveRequest{}
 	req.BorrowerId = borrowerId
-	req.RequestTo = to
+	req.EngineerId = to
 	req.Status = `pending`
 	req.Type = `reserveReport`
+	req.LoanId = loanPackageId
 	currentT := time.Now().Local()
 	date := currentT.Format("02-01-2006")
 	req.Date = date
@@ -201,10 +203,8 @@ func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerI
 
 	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerId)
-	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
-	borrowerAcc.Requests = append(borrowerAcc.Requests, req)
-	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
-	return req.Id, newBorrowerAsbytes
+
+	return req.Id, borrowerAsbytes
 }
 
 /*
