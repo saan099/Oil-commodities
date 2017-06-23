@@ -9,7 +9,7 @@ type borrower struct {
 	ComplianceCertificates []complianceCertificate `json:"complianceCertifiacte"`
 	Requests               []request               `json:"Requests"`
 	ReserveReports         []reserveReport         `json:"reserveReports"`
-	Cases              []case           `json:"cases"`
+	Cases                  []Case                  `json:"Cases"`
 }
 
 type financialReport struct {
@@ -68,7 +68,7 @@ type document struct {
 	Id      string `json:"id"`
 	DocName string `json:"docName"`
 }
-type case struct {
+type Case struct {
 	Id                    string                `json:"id"`
 	BorrowerId            string                `json:"borrowerId"`
 	AdministrativeAgentId string                `json:"administrativeAgentId"`
@@ -84,7 +84,7 @@ type case struct {
 
 type proposal struct {
 	Id       string  `json:"id"`
-	CaseId   string  `json:"caseId"`
+	CaseId   string  `json:"CaseId"`
 	LenderId string  `json:"lenderId"`
 	Amount   float64 `json;"amount"`
 	Status   string  `json:"status"`
@@ -98,16 +98,16 @@ type auditor struct {
 }
 
 type administrativeAgent struct {
-	Id          string        `json:"id"`
-	Name        string        `json:"name"`
-	Email       string        `json:"email"`
-	Cases []case `json:"cases"`
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Cases []Case `json:"Cases"`
 }
 
 type lender struct {
-	Id           string        `json:"id"`
-	Name         string        `json:"name"`
-	Email        string        `json:"email"`
-	Cases []case `json:"Cases"`
-	Proposals    []proposal    `json:"proposals"`
+	Id        string     `json:"id"`
+	Name      string     `json:"name"`
+	Email     string     `json:"email"`
+	Cases     []Case     `json:"Cases"`
+	Proposals []proposal `json:"proposals"`
 }

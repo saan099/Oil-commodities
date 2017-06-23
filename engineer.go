@@ -51,12 +51,12 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	engineerAsbytes, _ := stub.GetState(engineerId)
 	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
 	var borrowerid string
-	var caseId string
+	var CaseId string
 	for i := range engineerAcc.Requests {
 		if engineerAcc.Requests[i].Id == reqId {
 			borrowerid = engineerAcc.Requests[i].BorrowerId
 			engineerAcc.Requests[i].Status = `done`
-			caseId = engineerAcc.Requests[i].LoanId
+			CaseId = engineerAcc.Requests[i].LoanId
 		}
 	}
 
@@ -84,7 +84,7 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	borrowerAsbytes, _ := stub.GetState(borrowerid)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 	for i := range borrowerAcc.Cases {
-		if borrowerAcc.Cases[i].Id == caseId {
+		if borrowerAcc.Cases[i].Id == CaseId {
 			borrowerAcc.Cases[i].ReserveReport = reserveRep
 			borrowerAcc.Cases[i].Status = `delivered`
 			borrowerAcc.Cases[i].RequestReserveReport.Status = `done`

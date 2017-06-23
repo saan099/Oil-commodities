@@ -122,7 +122,7 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	}
 
 	borrowerId := args[0]
-	caseId := args[1]
+	CaseId := args[1]
 	amountRequested := args[2]
 	adminAgentId := args[3]
 	//financialStatementNumber := strconv.Atoi(args[3])
@@ -131,15 +131,15 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	numOfDocs, _ := strconv.Atoi(args[6])
 
 	borrowerAcc := borrower{}
-	requestId, borrowerAsbytes := RequestReserveReport(stub, requestTo, borrowerId, caseId)
+	requestId, borrowerAsbytes := RequestReserveReport(stub, requestTo, borrowerId, CaseId)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 
 	var docs []document
-	loanPack := case{}
+	loanPack := Case{}
 	////////////////////////////////////////////////////
 	//          loan package parsing
 	////////////////////////////////////////////////////
-	loanPack.Id = caseId
+	loanPack.Id = CaseId
 	loanPack.AmountRequested, _ = strconv.ParseFloat(amountRequested, 64)
 	loanPack.BorrowerId = borrowerId
 	loanPack.AdministrativeAgentId = adminAgentId
@@ -180,13 +180,13 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	return nil, nil
 }
 
-func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerId string, caseId string) (string, []byte) {
+func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerId string, CaseId string) (string, []byte) {
 	req := reserveRequest{}
 	req.BorrowerId = borrowerId
 	req.EngineerId = to
 	req.Status = `pending`
 	req.Type = `reserveReport`
-	req.LoanId = caseId
+	req.LoanId = CaseId
 	currentT := time.Now().Local()
 	date := currentT.Format("02-01-2006")
 	req.Date = date
