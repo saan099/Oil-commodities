@@ -122,7 +122,7 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	}
 
 	borrowerId := args[0]
-	loanPackageId := args[1]
+	caseId := args[1]
 	amountRequested := args[2]
 	adminAgentId := args[3]
 	//financialStatementNumber := strconv.Atoi(args[3])
@@ -131,15 +131,15 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	numOfDocs, _ := strconv.Atoi(args[6])
 
 	borrowerAcc := borrower{}
-	requestId, borrowerAsbytes := RequestReserveReport(stub, requestTo, borrowerId, loanPackageId)
+	requestId, borrowerAsbytes := RequestReserveReport(stub, requestTo, borrowerId, caseId)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 
 	var docs []document
-	loanPack := loanPackage{}
+	loanPack := case{}
 	////////////////////////////////////////////////////
 	//          loan package parsing
 	////////////////////////////////////////////////////
-	loanPack.Id = loanPackageId
+	loanPack.Id = caseId
 	loanPack.AmountRequested, _ = strconv.ParseFloat(amountRequested, 64)
 	loanPack.BorrowerId = borrowerId
 	loanPack.AdministrativeAgentId = adminAgentId
@@ -170,7 +170,7 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 		loanPack.FinancialReports = append(loanPack.FinancialReports, borrowerAcc.FinancialReports[j])
 	}
 
-	borrowerAcc.LoanPacks = append(borrowerAcc.LoanPacks, loanPack)
+	borrowerAcc.Cases = append(borrowerAcc.Cases, loanPack)
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
 	err := stub.PutState(borrowerId, newBorrowerAsbytes)
 	if err != nil {
@@ -180,13 +180,13 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	return nil, nil
 }
 
-func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerId string, loanPackageId string) (string, []byte) {
+func RequestReserveReport(stub shim.ChaincodeStubInterface, to string, borrowerId string, caseId string) (string, []byte) {
 	req := reserveRequest{}
 	req.BorrowerId = borrowerId
 	req.EngineerId = to
 	req.Status = `pending`
 	req.Type = `reserveReport`
-	req.LoanId = loanPackageId
+	req.LoanId = caseId
 	currentT := time.Now().Local()
 	date := currentT.Format("02-01-2006")
 	req.Date = date

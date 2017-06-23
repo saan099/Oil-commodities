@@ -36,16 +36,16 @@ func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 		return nil, errors.New(`worng number of arguments`)
 	}
 	administrativeAgentId := args[0]
-	loanPackageId := args[1]
+	caseeId := args[1]
 	status := args[2]
 
 	adminAgentAcc := administrativeAgent{}
 	adminAgentAsbytes, _ := stub.GetState(administrativeAgentId)
 	_ = json.Unmarshal(adminAgentAsbytes, &adminAgentAcc)
-	loanPack := loanPackage{}
+	loanPack := case{}
 	var borrowerId string
 	for i := range adminAgentAcc.LoanPackage {
-		if adminAgentAcc.LoanPackage[i].Id == loanPackageId {
+		if adminAgentAcc.LoanPackage[i].Id == caseId {
 			adminAgentAcc.LoanPackage[i].Status = status
 			loanPack = adminAgentAcc.LoanPackage[i]
 			borrowerId = adminAgentAcc.LoanPackage[i].BorrowerId
@@ -56,9 +56,9 @@ func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	borrowerAsbytes, _ := stub.GetState(borrowerId)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 
-	for i := range borrowerAcc.LoanPacks {
-		if borrowerAcc.LoanPacks[i].Id == loanPackageId {
-			borrowerAcc.LoanPacks[i].Status = status
+	for i := range borrowerAcc.Cases {
+		if borrowerAcc.Cases[i].Id == caseId {
+			borrowerAcc.Cases[i].Status = status
 		}
 	}
 
@@ -74,7 +74,7 @@ func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	if err != nil {
 		return nil, errors.New(`didnt write state`)
 	}
-	var loanStack []loanPackage
+	var loanStack []case
 	loansAsbytes, _ := stub.GetState(loanStackKey)
 	_ = json.Unmarshal(loansAsbytes, &loanStack)
 	if loanPack.Status == `verified` {

@@ -26,7 +26,7 @@ func (t *Oilchain) Init(stub shim.ChaincodeStubInterface, function string, args 
 	if len(args) != 0 {
 		return nil, errors.New("error:A01 wrong number of aguments in initialization")
 	}
-	var loans []loanPackage
+	var loans []case
 	loansAsbytes, _ := json.Marshal(loans)
 	err := stub.PutState(loanStackKey, loansAsbytes)
 	if err != nil {

@@ -51,12 +51,12 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	engineerAsbytes, _ := stub.GetState(engineerId)
 	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
 	var borrowerid string
-	var loanId string
+	var caseId string
 	for i := range engineerAcc.Requests {
 		if engineerAcc.Requests[i].Id == reqId {
 			borrowerid = engineerAcc.Requests[i].BorrowerId
 			engineerAcc.Requests[i].Status = `done`
-			loanId = engineerAcc.Requests[i].LoanId
+			caseId = engineerAcc.Requests[i].LoanId
 		}
 	}
 
@@ -83,12 +83,12 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerid)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
-	for i := range borrowerAcc.LoanPacks {
-		if borrowerAcc.LoanPacks[i].Id == loanId {
-			borrowerAcc.LoanPacks[i].ReserveReport = reserveRep
-			borrowerAcc.LoanPacks[i].Status = `delivered`
-			borrowerAcc.LoanPacks[i].RequestReserveReport.Status = `done`
-			erro := sendLoanPackage(stub, borrowerAcc.LoanPacks[i].AdministrativeAgentId, borrowerAcc.LoanPacks[i])
+	for i := range borrowerAcc.Cases {
+		if borrowerAcc.Cases[i].Id == caseId {
+			borrowerAcc.Cases[i].ReserveReport = reserveRep
+			borrowerAcc.Cases[i].Status = `delivered`
+			borrowerAcc.Cases[i].RequestReserveReport.Status = `done`
+			erro := sendLoanPackage(stub, borrowerAcc.Cases[i].AdministrativeAgentId, borrowerAcc.Cases[i])
 			if erro != nil {
 				return nil, errors.New(`couldnt send loan apckage to administrative agent`)
 			}
