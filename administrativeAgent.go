@@ -28,7 +28,7 @@ func (t *Oilchain) InitAdministrativeAgent(stub shim.ChaincodeStubInterface, arg
 	if err != nil {
 		return nil, errors.New(`didnt write state`)
 	}
-	return borrowerAsbytes, nil
+	return adminAsbytes, nil
 }
 
 func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -36,7 +36,7 @@ func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 		return nil, errors.New(`worng number of arguments`)
 	}
 	administrativeAgentId := args[0]
-	CaseeId := args[1]
+	CaseId := args[1]
 	status := args[2]
 
 	adminAgentAcc := administrativeAgent{}
@@ -44,11 +44,11 @@ func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	_ = json.Unmarshal(adminAgentAsbytes, &adminAgentAcc)
 	loanPack := Case{}
 	var borrowerId string
-	for i := range adminAgentAcc.LoanPackage {
-		if adminAgentAcc.LoanPackage[i].Id == CaseId {
-			adminAgentAcc.LoanPackage[i].Status = status
-			loanPack = adminAgentAcc.LoanPackage[i]
-			borrowerId = adminAgentAcc.LoanPackage[i].BorrowerId
+	for i := range adminAgentAcc.Cases {
+		if adminAgentAcc.Cases[i].Id == CaseId {
+			adminAgentAcc.Cases[i].Status = status
+			loanPack = adminAgentAcc.Cases[i]
+			borrowerId = adminAgentAcc.Cases[i].BorrowerId
 		}
 	}
 

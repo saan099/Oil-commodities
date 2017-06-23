@@ -104,12 +104,12 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	return nil, nil
 }
 
-func sendLoanPackage(stub shim.ChaincodeStubInterface, adminId string, loanPack loanPackage) error {
+func sendLoanPackage(stub shim.ChaincodeStubInterface, adminId string, c Case) error {
 
 	adminAcc := administrativeAgent{}
 	adminAsbytes, _ := stub.GetState(adminId)
 	_ = json.Unmarshal(adminAsbytes, &adminAcc)
-	adminAcc.LoanPackage = append(adminAcc.LoanPackage, loanPack)
+	adminAcc.Cases = append(adminAcc.Cases, c)
 	newAdminAsbytes, _ := json.Marshal(adminAcc)
 	err := stub.PutState(adminId, newAdminAsbytes)
 	if err != nil {
