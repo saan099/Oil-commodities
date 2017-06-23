@@ -80,10 +80,10 @@ type Case struct {
 	AmountRequested       float64               `json:"amountRequested"`
 	BorrowerName          string                `json:"borrowerName"`
 	Status                string                `json:"status"`
+	Proposals             []proposal            `json:"proposals"`
 }
 
 type proposal struct {
-	Id       string  `json:"id"`
 	CaseId   string  `json:"CaseId"`
 	LenderId string  `json:"lenderId"`
 	Amount   float64 `json;"amount"`

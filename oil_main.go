@@ -12,7 +12,7 @@ type Oilchain struct {
 }
 
 var borrowersKey = `borrowersKey`
-var loanStackKey = `loanStack`
+var casestack = `caseStack`
 
 func main() {
 
@@ -28,7 +28,7 @@ func (t *Oilchain) Init(stub shim.ChaincodeStubInterface, function string, args 
 	}
 	var loans []Case
 	loansAsbytes, _ := json.Marshal(loans)
-	err := stub.PutState(loanStackKey, loansAsbytes)
+	err := stub.PutState(casestack, loansAsbytes)
 	if err != nil {
 		return nil, errors.New(`didnt write state.`)
 	}
@@ -61,6 +61,10 @@ func (t *Oilchain) Invoke(stub shim.ChaincodeStubInterface, function string, arg
 		return t.UpdateLoanPackage(stub, args)
 	} else if function == "requestFinancialStatement" {
 		return t.RequestFinancialStatement(stub, args)
+	} else if function == "initLender" {
+		return t.InitLender(stub, args)
+	} else if function == "makeProposals" {
+		return t.MakeProposals(stub, args)
 	}
 
 	return nil, errors.New("error:C01 No function called")
