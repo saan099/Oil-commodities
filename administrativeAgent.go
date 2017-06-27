@@ -104,7 +104,7 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 	loanPack := loan{}
 	loanPack.LoanId = loanId
 	loanPack.ApprovalDate = approvalDate
-	loanPack.Term, _ = strconv.Atoi(term)
+	loanPack.Term, _ = strconv.ParseFloat(term, 64)
 	loanPack.LoanAmount, _ = strconv.ParseFloat(loanAmount, 64)
 	for i := 7; i < 7+numOfLenders; i++ {
 		lenders = append(lenders, args[i])
@@ -134,7 +134,7 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 		}
 	}
 
-	for i := 7; i < 7+numOfLender; i++ {
+	for i := 7; i < 7+numOfLenders; i++ {
 		lenderAcc := lender{}
 		lenderId := args[i]
 		lenderAsbytes, _ := stub.GetState(lenderId)
@@ -212,7 +212,7 @@ func (t *Oilchain) MakeCreditAgreement(stub shim.ChaincodeStubInterface, args []
 				lenderAcc.Loans[i].CreditAgreement = credit
 			}
 		}
-		newLenderAsbytes, _ := json.Marshal(lenders[j], newLenderAsbytes)
+		newLenderAsbytes, _ := json.Marshal(lenderAcc)
 		_ = stub.PutState(lenders[j], newLenderAsbytes)
 
 	}

@@ -46,7 +46,7 @@ func (t *Oilchain) MakeProposals(stub shim.ChaincodeStubInterface, args []string
 	pro := proposal{}
 	pro.CaseId = caseId
 	pro.LenderId = lenderId
-	pro.Amount = strconv.Atoi(amount)
+	pro.Amount, _ = strconv.ParseFloat(amount, 64)
 	pro.Status = `pending`
 
 	var cases []Case

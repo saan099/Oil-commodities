@@ -105,7 +105,7 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 }
 
 func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) {
+	if len(args) < 6 {
 		return nil, errors.New(`wrong number of arguments`)
 	}
 	engineerId := args[0]
@@ -119,13 +119,13 @@ func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []str
 	var loanId string
 	var lenders []string
 	reserveRep := reserveReport{}
-	reserveRep.DevelopedCrude = strconv.Atoi(developedCrude)
-	reserveRep.UndevelopedCrude = strconv.Atoi(undevelopedCrude)
+	reserveRep.DevelopedCrude, _ = strconv.ParseFloat(developedCrude, 64)
+	reserveRep.UndevelopedCrude, _ = strconv.ParseFloat(undevelopedCrude, 64)
 	reserveRep.Date = date
 	reserveRep.Id = reportId
 
 	engineerAcc := engineer{}
-	engineerAsbytes, _ := stub.getState(engineerId)
+	engineerAsbytes, _ := stub.GetState(engineerId)
 	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
 
 	for i := range engineerAcc.CreditAgreements {
@@ -143,7 +143,7 @@ func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []str
 		if adminAcc.Loans[i].LoanId == loanId {
 			reserveRep.BorrowerId = adminAcc.Loans[i].LoanCase.BorrowerId
 			borrowerId = adminAcc.Loans[i].LoanCase.BorrowerId
-			reserveRep.RequestId = adminAcc.Loans[i].LoanCase.ReserveReports[0]
+			reserveRep.RequestId = adminAcc.Loans[i].LoanCase.ReserveReports[0].RequestId
 			adminAcc.Loans[i].LoanCase.ReserveReports = append(adminAcc.Loans[i].LoanCase.ReserveReports, reserveRep)
 			lenders = adminAcc.Loans[i].Lenders
 		}
