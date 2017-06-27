@@ -112,7 +112,7 @@ type loan struct {
 	LoanId          string          `json:"loanId"`
 	LoanCase        Case            `json:"loanCase"`
 	LoanAmount      float64         `json:"loanAmount"`
-	ApprovalDate    float64         `json:"approvalDate"`
+	ApprovalDate    string          `json:"approvalDate"`
 	Term            float64         `json:"term"`
 	Lenders         []string        `json:"lenders"`
 	CreditAgreement creditAgreement `json:"creditAgreement"`

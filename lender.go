@@ -43,8 +43,6 @@ func (t *Oilchain) MakeProposals(stub shim.ChaincodeStubInterface, args []string
 	adminId := args[2]
 	amount := args[3]
 
-	lenderId := lender{}
-
 	pro := proposal{}
 	pro.CaseId = caseId
 	pro.LenderId = lenderId

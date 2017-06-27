@@ -76,11 +76,13 @@ func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 		return nil, errors.New(`didnt write state`)
 	}
 	var loanStack []Case
-	loansAsbytes, _ := stub.GetState(loanStackKey)
+	loansAsbytes, _ := stub.GetState(casestack)
 	_ = json.Unmarshal(loansAsbytes, &loanStack)
 	if loanPack.Status == `verified` {
 		loanStack = append(loanStack, loanPack)
 	}
+	newLoansAsbytes, _ := json.Marshal(loanStack)
+	_ = stub.PutState(casestack, newLoansAsbytes)
 
 	return nil, nil
 }
@@ -96,14 +98,14 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 	approvalDate := args[3]
 	term := args[4]
 	loanAmount := args[5]
-	numOfLenders := args[6]
+	numOfLenders, _ := strconv.Atoi(args[6])
 	var lenders []string
 	var borrowerId string
 	loanPack := loan{}
 	loanPack.LoanId = loanId
 	loanPack.ApprovalDate = approvalDate
-	loanPack.Term = strconv.Atoi(term)
-	loanPack.LoanAmount = strconv.ParseFloat(loanAmount, 64)
+	loanPack.Term, _ = strconv.Atoi(term)
+	loanPack.LoanAmount, _ = strconv.ParseFloat(loanAmount, 64)
 	for i := 7; i < 7+numOfLenders; i++ {
 		lenders = append(lenders, args[i])
 	}
@@ -122,7 +124,7 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 	err := stub.PutState(adminId, newAdminAsbytes)
 
 	borrowerAcc := borrower{}
-	borrowerAsbytes := stub.GetState(borrowerId)
+	borrowerAsbytes, _ := stub.GetState(borrowerId)
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 
 	borrowerAcc.Loans = append(borrowerAcc.Loans, loanPack)
@@ -132,7 +134,7 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 		}
 	}
 
-	for i := 7; i < 7+strconv.Atoi(numOfLenders); i++ {
+	for i := 7; i < 7+numOfLender; i++ {
 		lenderAcc := lender{}
 		lenderId := args[i]
 		lenderAsbytes, _ := stub.GetState(lenderId)
@@ -167,8 +169,8 @@ func (t *Oilchain) MakeCreditAgreement(stub shim.ChaincodeStubInterface, args []
 
 	credit := creditAgreement{}
 	credit.CreditId = creditId
-	credit.Interval = strconv.ParseFloat(interval, 64)
-	credit.RequiredReserve = strconv.ParseFloat(reserveRequired, 64)
+	credit.Interval, _ = strconv.ParseFloat(interval, 64)
+	credit.RequiredReserve, _ = strconv.ParseFloat(reserveRequired, 64)
 	credit.LoanId = loanId
 	credit.AdminId = adminId
 	for i := range adminAcc.Loans {
