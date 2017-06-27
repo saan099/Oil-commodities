@@ -116,6 +116,7 @@ type loan struct {
 	Term            float64         `json:"term"`
 	Lenders         []string        `json:"lenders"`
 	CreditAgreement creditAgreement `json:"creditAgreement"`
+	Status          string          `json:"status"`
 }
 type creditAgreement struct {
 	LoanId          string  `json:"loanId"`

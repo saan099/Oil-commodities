@@ -106,6 +106,7 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 	loanPack.ApprovalDate = approvalDate
 	loanPack.Term, _ = strconv.ParseFloat(term, 64)
 	loanPack.LoanAmount, _ = strconv.ParseFloat(loanAmount, 64)
+	loanPack.Status = `valid`
 	for i := 7; i < 7+numOfLenders; i++ {
 		lenders = append(lenders, args[i])
 	}
