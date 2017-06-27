@@ -121,7 +121,7 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 	}
 	adminAcc.Loans = append(adminAcc.Loans, loanPack)
 	newAdminAsbytes, _ := json.Marshal(adminAcc)
-	err := stub.PutState(adminId, newAdminAsbytes)
+	_ = stub.PutState(adminId, newAdminAsbytes)
 
 	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerId)
