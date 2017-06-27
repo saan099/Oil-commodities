@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"strconv"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -80,6 +81,145 @@ func (t *Oilchain) UpdateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	if loanPack.Status == `verified` {
 		loanStack = append(loanStack, loanPack)
 	}
+
+	return nil, nil
+}
+
+func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) < 6 {
+		return nil, errors.New(`wrong number of arguments `)
+	}
+
+	adminId := args[0]
+	caseId := args[1]
+	loanId := args[2]
+	approvalDate := args[3]
+	term := args[4]
+	loanAmount := args[5]
+	numOfLenders := args[6]
+	var lenders []string
+	var borrowerId string
+	loanPack := loan{}
+	loanPack.LoanId = loanId
+	loanPack.ApprovalDate = approvalDate
+	loanPack.Term = strconv.Atoi(term)
+	loanPack.LoanAmount = strconv.ParseFloat(loanAmount, 64)
+	for i := 7; i < 7+numOfLenders; i++ {
+		lenders = append(lenders, args[i])
+	}
+	loanPack.Lenders = lenders
+	adminAcc := administrativeAgent{}
+	adminAsbytes, _ := stub.GetState(adminId)
+	_ = json.Unmarshal(adminAsbytes, &adminAcc)
+	for i := range adminAcc.Cases {
+		if adminAcc.Cases[i].Id == caseId {
+			adminAcc.Cases[i].Status = `loanPackage made`
+			borrowerId = adminAcc.Cases[i].BorrowerId
+		}
+	}
+	adminAcc.Loans = append(adminAcc.Loans, loanPack)
+	newAdminAsbytes, _ := json.Marshal(adminAcc)
+	err := stub.PutState(adminId, newAdminAsbytes)
+
+	borrowerAcc := borrower{}
+	borrowerAsbytes := stub.GetState(borrowerId)
+	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+
+	borrowerAcc.Loans = append(borrowerAcc.Loans, loanPack)
+	for i := range borrowerAcc.Cases {
+		if borrowerAcc.Cases[i].Id == caseId {
+			borrowerAcc.Cases[i].Status = `loanPackage made`
+		}
+	}
+
+	for i := 7; i < 7+strconv.Atoi(numOfLenders); i++ {
+		lenderAcc := lender{}
+		lenderId := args[i]
+		lenderAsbytes, _ := stub.GetState(lenderId)
+		_ = json.Unmarshal(lenderAsbytes, &lenderAcc)
+		lenderAcc.Loans = append(lenderAcc.Loans, loanPack)
+		newLenderAsbytes, _ := json.Marshal(lenderAcc)
+		e := stub.PutState(lenderId, newLenderAsbytes)
+		if e != nil {
+			return nil, errors.New(`didnt write state`)
+		}
+	}
+
+	return nil, nil
+}
+
+func (t *Oilchain) MakeCreditAgreement(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) < 3 {
+		return nil, errors.New(`wrong number of arguments`)
+	}
+
+	adminId := args[0]
+	creditId := args[1]
+	loanId := args[2]
+	interval := args[3]
+	reserveRequired := args[4]
+	var borrowerId string
+	var engineerId string
+	var lenders []string
+	adminAcc := administrativeAgent{}
+	adminAsbytes, _ := stub.GetState(adminId)
+	_ = json.Unmarshal(adminAsbytes, &adminAcc)
+
+	credit := creditAgreement{}
+	credit.CreditId = creditId
+	credit.Interval = strconv.ParseFloat(interval, 64)
+	credit.RequiredReserve = strconv.ParseFloat(reserveRequired, 64)
+	credit.LoanId = loanId
+	credit.AdminId = adminId
+	for i := range adminAcc.Loans {
+
+		if adminAcc.Loans[i].LoanId == loanId {
+			adminAcc.Loans[i].CreditAgreement = credit
+			borrowerId = adminAcc.Loans[i].LoanCase.BorrowerId
+			engineerId = adminAcc.Loans[i].LoanCase.EngineerId
+			lenders = adminAcc.Loans[i].Lenders
+		}
+	}
+	newAdminAsbytes, _ := json.Marshal(adminAcc)
+	err := stub.PutState(adminId, newAdminAsbytes)
+	if err != nil {
+		return nil, errors.New(`didnt write state`)
+	}
+
+	borrowerAcc := borrower{}
+	borrowerAsbytes, _ := stub.GetState(borrowerId)
+	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+
+	for i := range borrowerAcc.Loans {
+		if borrowerAcc.Loans[i].LoanId == loanId {
+			borrowerAcc.Loans[i].CreditAgreement = credit
+		}
+	}
+
+	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
+	err = stub.PutState(borrowerId, newBorrowerAsbytes)
+	if err != nil {
+		return nil, errors.New(`wrong number of arguments`)
+	}
+	for j := range lenders {
+		lenderAcc := lender{}
+		lenderAsbytes, _ := stub.GetState(lenders[j])
+		_ = json.Unmarshal(lenderAsbytes, &lenderAcc)
+		for i := range lenderAcc.Loans {
+			if lenderAcc.Loans[i].LoanId == loanId {
+				lenderAcc.Loans[i].CreditAgreement = credit
+			}
+		}
+		newLenderAsbytes, _ := json.Marshal(lenders[j], newLenderAsbytes)
+		_ = stub.PutState(lenders[j], newLenderAsbytes)
+
+	}
+	engineerAcc := engineer{}
+	engineerAsbytes, _ := stub.GetState(engineerId)
+	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
+	engineerAcc.CreditAgreements = append(engineerAcc.CreditAgreements, credit)
+	newEngineerAsbytes, _ := json.Marshal(engineerAcc)
+	_ = stub.PutState(engineerId, newEngineerAsbytes)
 
 	return nil, nil
 }

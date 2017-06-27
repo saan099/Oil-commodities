@@ -116,7 +116,7 @@ func (t *Oilchain) AddComplianceCertificate(stub shim.ChaincodeStubInterface, ar
 	return nil, nil
 }
 
-func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *Oilchain) CreateCase(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) < 6 {
 		return nil, errors.New("wrong number of arguments")
 	}
@@ -142,6 +142,7 @@ func (t *Oilchain) CreateLoanPackage(stub shim.ChaincodeStubInterface, args []st
 	loanPack.Id = CaseId
 	loanPack.AmountRequested, _ = strconv.ParseFloat(amountRequested, 64)
 	loanPack.BorrowerId = borrowerId
+	loanPack.EngineerId = requestTo
 	loanPack.AdministrativeAgentId = adminAgentId
 	for i := 0; i < len(borrowerAcc.ComplianceCertificates); i++ {
 		if borrowerAcc.ComplianceCertificates[i].Id == complianceId {

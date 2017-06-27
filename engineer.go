@@ -85,7 +85,7 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
 	for i := range borrowerAcc.Cases {
 		if borrowerAcc.Cases[i].Id == CaseId {
-			borrowerAcc.Cases[i].ReserveReport = reserveRep
+			borrowerAcc.Cases[i].ReserveReports = append(borrowerAcc.Cases[i].ReserveReports, reserveRep)
 			borrowerAcc.Cases[i].Status = `delivered`
 			borrowerAcc.Cases[i].RequestReserveReport.Status = `done`
 			erro := sendLoanPackage(stub, borrowerAcc.Cases[i].AdministrativeAgentId, borrowerAcc.Cases[i])
@@ -99,6 +99,88 @@ func (t *Oilchain) MakeReserveReport(stub shim.ChaincodeStubInterface, args []st
 	err = stub.PutState(borrowerid, newBorrowerAsbytes)
 	if err != nil {
 		return nil, errors.New("didnt write state")
+	}
+
+	return nil, nil
+}
+
+func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) {
+		return nil, errors.New(`wrong number of arguments`)
+	}
+	engineerId := args[0]
+	creditId := args[1]
+	reportId := args[2]
+	date := args[3]
+	developedCrude := args[4]
+	undevelopedCrude := args[5]
+	var borrowerId string
+	var adminId string
+	var loanId string
+	var lenders []string
+	reserveRep := reserveReport{}
+	reserveRep.DevelopedCrude = strconv.Atoi(developedCrude)
+	reserveRep.UndevelopedCrude = strconv.Atoi(undevelopedCrude)
+	reserveRep.Date = date
+	reserveRep.Id = reportId
+
+	engineerAcc := engineer{}
+	engineerAsbytes, _ := stub.getState(engineerId)
+	_ = json.Unmarshal(engineerAsbytes, &engineerAcc)
+
+	for i := range engineerAcc.CreditAgreements {
+		if engineerAcc.CreditAgreements[i].CreditId == creditId {
+
+			adminId = engineerAcc.CreditAgreements[i].AdminId
+			loanId = engineerAcc.CreditAgreements[i].LoanId
+		}
+	}
+
+	adminAcc := administrativeAgent{}
+	adminAsbytes, _ := stub.GetState(adminId)
+	_ = json.Unmarshal(adminAsbytes, &adminAcc)
+	for i := range adminAcc.Loans {
+		if adminAcc.Loans[i].LoanId == loanId {
+			reserveRep.BorrowerId = adminAcc.Loans[i].LoanCase.BorrowerId
+			borrowerId = adminAcc.Loans[i].LoanCase.BorrowerId
+			reserveRep.RequestId = adminAcc.Loans[i].LoanCase.ReserveReports[0]
+			adminAcc.Loans[i].LoanCase.ReserveReports = append(adminAcc.Loans[i].LoanCase.ReserveReports, reserveRep)
+			lenders = adminAcc.Loans[i].Lenders
+		}
+	}
+
+	borrowerAcc := borrower{}
+	borrowerAsbytes, _ := stub.GetState(borrowerId)
+	_ = json.Unmarshal(borrowerAsbytes, &borrowerAcc)
+
+	for i := range borrowerAcc.Loans {
+		if borrowerAcc.Loans[i].LoanId == loanId {
+			borrowerAcc.Loans[i].LoanCase.ReserveReports = append(borrowerAcc.Loans[i].LoanCase.ReserveReports, reserveRep)
+		}
+	}
+	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
+	_ = stub.PutState(borrowerId, newBorrowerAsbytes)
+
+	for i := range engineerAcc.CreditAgreements {
+		if engineerAcc.CreditAgreements[i].CreditId == creditId {
+
+			engineerAcc.ReserveReports = append(engineerAcc.ReserveReports, reserveRep)
+		}
+	}
+	newEngineerAsbytes, _ := json.Marshal(engineerAcc)
+	_ = stub.PutState(engineerId, newEngineerAsbytes)
+
+	for i := range lenders {
+		lenderAcc := lender{}
+		lenderAsbytes, _ := stub.GetState(lenders[i])
+		_ = json.Unmarshal(lenderAsbytes, &lenderAcc)
+		for j := range lenderAcc.Loans {
+			if lenderAcc.Loans[j].LoanId == loanId {
+				lenderAcc.Loans[j].LoanCase.ReserveReports = append(lenderAcc.Loans[j].LoanCase.ReserveReports, reserveRep)
+			}
+		}
+		newLenderAsbytes, _ := json.Marshal(lenderAcc)
+		_ = stub.PutState(lenders[i], newLenderAsbytes)
 	}
 
 	return nil, nil
