@@ -50,7 +50,7 @@ func (t *Oilchain) MakeProposals(stub shim.ChaincodeStubInterface, args []string
 	pro.Status = `pending`
 
 	var cases []Case
-	CaseStackAsbytes := stub.GetState(casestack)
+	CaseStackAsbytes, _ := stub.GetState(casestack)
 	_ = json.Unmarshal(CaseStackAsbytes, &cases)
 	for i := range cases {
 		if cases[i].Id == caseId {
