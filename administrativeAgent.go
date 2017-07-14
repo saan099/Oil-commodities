@@ -107,6 +107,7 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 	loanPack.Term, _ = strconv.ParseFloat(term, 64)
 	loanPack.LoanAmount, _ = strconv.ParseFloat(loanAmount, 64)
 	loanPack.Status = `valid`
+
 	for i := 7; i < 7+numOfLenders; i++ {
 		lenders = append(lenders, args[i])
 	}
@@ -116,6 +117,7 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 	_ = json.Unmarshal(adminAsbytes, &adminAcc)
 	for i := range adminAcc.Cases {
 		if adminAcc.Cases[i].Id == caseId {
+			loanPack.LoanCase = adminAcc.Cases[i]
 			adminAcc.Cases[i].Status = `loanPackage made`
 			borrowerId = adminAcc.Cases[i].BorrowerId
 		}
@@ -134,6 +136,8 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 			borrowerAcc.Cases[i].Status = `loanPackage made`
 		}
 	}
+	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
+	_ = stub.PutState(borrowerId, newAdminAsbytes)
 
 	for i := 7; i < 7+numOfLenders; i++ {
 		lenderAcc := lender{}
