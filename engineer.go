@@ -118,7 +118,7 @@ func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []str
 	var adminId string
 	var loanId string
 	var lenders []string
-	credit:=creditAgreement{}
+	credit := creditAgreement{}
 	reserveRep := reserveReport{}
 	reserveRep.DevelopedCrude, _ = strconv.ParseFloat(developedCrude, 64)
 	reserveRep.UndevelopedCrude, _ = strconv.ParseFloat(undevelopedCrude, 64)
@@ -134,10 +134,10 @@ func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []str
 
 			adminId = engineerAcc.CreditAgreements[i].AdminId
 			loanId = engineerAcc.CreditAgreements[i].LoanId
-			credit=engineerAcc.CreditAgreements[i]
+			credit = engineerAcc.CreditAgreements[i]
 		}
 	}
-	nullError:=checkNullandVoid(credit, reserveRep)
+	nullError := checkNullandVoid(credit, reserveRep)
 
 	adminAcc := administrativeAgent{}
 	adminAsbytes, _ := stub.GetState(adminId)
@@ -149,8 +149,8 @@ func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []str
 			reserveRep.RequestId = adminAcc.Loans[i].LoanCase.ReserveReports[0].RequestId
 			adminAcc.Loans[i].LoanCase.ReserveReports = append(adminAcc.Loans[i].LoanCase.ReserveReports, reserveRep)
 			lenders = adminAcc.Loans[i].Lenders
-			if nullError!=nil {
-				adminAcc.Loans[i].Status=`not valid`
+			if nullError != nil {
+				adminAcc.Loans[i].Status = `not valid`
 			}
 		}
 	}
@@ -162,8 +162,8 @@ func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []str
 	for i := range borrowerAcc.Loans {
 		if borrowerAcc.Loans[i].LoanId == loanId {
 			borrowerAcc.Loans[i].LoanCase.ReserveReports = append(borrowerAcc.Loans[i].LoanCase.ReserveReports, reserveRep)
-			if nullError!=nil {
-				borrowerAcc.Loans[i].Status=`not valid`
+			if nullError != nil {
+				borrowerAcc.Loans[i].Status = `not valid`
 			}
 		}
 	}
@@ -186,8 +186,8 @@ func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []str
 		for j := range lenderAcc.Loans {
 			if lenderAcc.Loans[j].LoanId == loanId {
 				lenderAcc.Loans[j].LoanCase.ReserveReports = append(lenderAcc.Loans[j].LoanCase.ReserveReports, reserveRep)
-				if nullError!=nil {
-					lenderAcc.Loans[j].Status=`not valid`
+				if nullError != nil {
+					lenderAcc.Loans[j].Status = `not valid`
 				}
 			}
 		}
@@ -195,19 +195,18 @@ func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []str
 		_ = stub.PutState(lenders[i], newLenderAsbytes)
 	}
 
-
-
 	return nil, nil
 }
 
-func checkNullandVoid(credit creditAgreement,reserveRep reserveReport) (error) {
+func checkNullandVoid(credit creditAgreement, reserveRep reserveReport) error {
 
-	if credit.RequiredReserve<reserveRep.DevelopedCrude {
+	if credit.RequiredReserve < reserveRep.DevelopedCrude {
 		return errors.New(`crude amount depleted`)
-	}else return nil
+	} else {
+		return nil
+	}
 
 }
-
 
 func sendLoanPackage(stub shim.ChaincodeStubInterface, adminId string, c Case) error {
 
