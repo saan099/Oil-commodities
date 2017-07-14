@@ -154,6 +154,8 @@ func (t *Oilchain) UpdateReserveRep(stub shim.ChaincodeStubInterface, args []str
 			}
 		}
 	}
+	newAdminAsbytes, _ := json.Marshal(adminAcc)
+	_ = stub.PutState(adminId, newAdminAsbytes)
 
 	borrowerAcc := borrower{}
 	borrowerAsbytes, _ := stub.GetState(borrowerId)
