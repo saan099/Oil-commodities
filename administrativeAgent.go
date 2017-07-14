@@ -137,7 +137,7 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 		}
 	}
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
-	_ = stub.PutState(borrowerId, newAdminAsbytes)
+	_ = stub.PutState(borrowerId, newBorrowerAsbytes)
 
 	for i := 7; i < 7+numOfLenders; i++ {
 		lenderAcc := lender{}
